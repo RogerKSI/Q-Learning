@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 #include <string.h>
+#include <time.h>
 #include "utils/utils.h"
 
 using namespace std;
@@ -51,6 +52,7 @@ void get_possible_action(double R[100][100], int state, int possible_action[10])
         }
     }
 }
+
 double get_max_q(double Q[100][100], int state){
     double temp_max = 0;
     for (int i = 0; i < ACTION_NUM; ++i) {
@@ -60,6 +62,7 @@ double get_max_q(double Q[100][100], int state){
     }
     return temp_max;
 }
+
 int episode_iterator(int init_state, double Q[100][100], double R[100][100]){
 
     double Q_before, Q_after;
@@ -113,6 +116,7 @@ int inference_best_action(int now_state, double Q[100][100]){
     }
     return best_action;
 }
+
 void run_training(int init_state){
     int initial_state = init_state;
 
