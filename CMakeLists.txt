@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.5)
-project(Q-Learning)
+PROJECT(Q-Learning)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+CMAKE_MINIMUM_REQUIRED(VERSION 3.6)
+
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" ${CMAKE_MODULE_PATH} )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set( OpenCV_DIR ${CMAKE_SOURCE_DIR}/opencv )
-set(SOURCE_FILES main.cpp utils/utils.cpp utils/utils.h)
+set( SOURCE_FILES main.cpp utils/utils.cpp utils/utils.h)
 
 FIND_PACKAGE( OpenCV REQUIRED )
 
-INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS}  )
-LINK_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib/curl ${CMAKE_SOURCE_DIR}/lib/robot ${PCL_LIBRARY_DIRS} ${KinectSDK2_LIBRARY_DIRS} )
+INCLUDE_DIRECTORIES( ${OpenCV_INCLUDE_DIRS} )
 
-add_executable(Q-Learning ${SOURCE_FILES})
+ADD_EXECUTABLE(${PROJECT_NAME} ${SOURCE_FILES)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS} legacy_stdio_definitions.lib )
 
