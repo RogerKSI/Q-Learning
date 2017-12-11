@@ -23,20 +23,20 @@ using namespace cv;
 
 #define MAP_HEIGHT 100
 #define SPACE_BETWEEN 100
-#define PIPE 10
+#define PIPE 30
 #define MAP_WIDTH 300
 
 #define ACTION_NUM 2
 
-#define MAX_EPISODE 10000
+#define MAX_EPISODE 30000
 #define ALPHA 0.95
 
 #define SHIFT_BIRD 10
 #define JUMP 2
 #define DOWN 1
 
-double R[MAP_HEIGHT][SPACE_BETWEEN][MAP_HEIGHT][ACTION_NUM];
-double Q[MAP_HEIGHT][SPACE_BETWEEN][MAP_HEIGHT][ACTION_NUM];
+double R[MAP_HEIGHT + 30][SPACE_BETWEEN + 30][MAP_HEIGHT + 30][ACTION_NUM + 30];
+double Q[MAP_HEIGHT + 30][SPACE_BETWEEN + 30][MAP_HEIGHT + 30][ACTION_NUM + 30];
 
 vector<pair<int, int>> obstacles;
 
@@ -55,7 +55,7 @@ vector<pair<int, int>>::iterator getNextObstacle(int t) {
 void generateMap() {
 
 	obstacles.clear();
-	for (int i = SPACE_BETWEEN; i <= SPACE_BETWEEN * PIPE; i += SPACE_BETWEEN) {
+	for (int i = SPACE_BETWEEN + SHIFT_BIRD; i <= SPACE_BETWEEN * PIPE; i += SPACE_BETWEEN) {
 		obstacles.push_back({ i, (rand() % (MAP_HEIGHT - JUMP * 2)) + JUMP });
 	}
 }
@@ -259,7 +259,6 @@ int main() {
 		saveQMatrix();
 		cout << "saved" << endl;
 	}
-
 	
 	namedWindow("temp");
 	while (true){
