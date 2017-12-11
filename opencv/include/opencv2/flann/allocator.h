@@ -97,7 +97,6 @@ public:
         blocksize = blockSize;
         remaining = 0;
         base = NULL;
-        loc = NULL;
 
         usedMemory = 0;
         wastedMemory = 0;

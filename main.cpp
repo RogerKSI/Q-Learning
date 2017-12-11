@@ -28,6 +28,7 @@ using namespace cv;
 
 #define MAX_EPISODE 100000
 #define ALPHA 0.8
+#define LEARN 0.8
 
 #define SHIFT_BIRD 10
 #define JUMP 2
