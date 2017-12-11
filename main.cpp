@@ -15,6 +15,7 @@
 #include <time.h>
 #include "utils/utils.h"
 
+#include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 
 using namespace std;
@@ -22,13 +23,13 @@ using namespace cv;
 
 #define MAP_HEIGHT 100
 #define SPACE_BETWEEN 100
+#define PIPE 10
 #define MAP_WIDTH 300
 
 #define ACTION_NUM 2
 
-#define MAX_EPISODE 100000
-#define ALPHA 0.8
-#define LEARN 0.8
+#define MAX_EPISODE 10000
+#define ALPHA 0.95
 
 #define SHIFT_BIRD 10
 #define JUMP 2
@@ -54,7 +55,7 @@ vector<pair<int, int>>::iterator getNextObstacle(int t) {
 void generateMap() {
 
 	obstacles.clear();
-	for (int i = SPACE_BETWEEN; i <= 10000000; i += SPACE_BETWEEN) {
+	for (int i = SPACE_BETWEEN; i <= SPACE_BETWEEN * PIPE; i += SPACE_BETWEEN) {
 		obstacles.push_back({ i, (rand() % (MAP_HEIGHT - JUMP * 2)) + JUMP });
 	}
 }
@@ -72,6 +73,31 @@ int playGame(int &position, int action, int t, bool draw = false) {
 	// draw game
 	if (draw) {
 
+		Mat game(MAP_HEIGHT, MAP_WIDTH, CV_8UC3, Scalar(100, 100, 100));
+
+		auto temp = obstacle;
+
+		while (temp->first - t < MAP_WIDTH) {
+			for (int i = 0; i < MAP_HEIGHT; i++) {
+				if (i - 9 <= temp->second && temp->second <= i + 9);
+				else
+					game.at<Vec3b>(i, temp->first - t) = Vec3b(0, 255, 0);
+			}
+
+			temp++;
+		}
+
+		for (int i = SHIFT_BIRD; i <= SHIFT_BIRD; i++) {
+			for (int j = position - 5; j <= position + 5; j++) {
+				if(i>=0 && i<= MAP_WIDTH && j>=0 && j<MAP_HEIGHT)
+					game.at<Vec3b>(j, i) = Vec3b(0, 0, 255);
+			}
+		}
+	
+
+		String s = "g";
+		resize(game, game, Size(MAP_WIDTH * 2, MAP_HEIGHT * 2));
+		imshow(s, game);
 	}
 
 	// check status of game (win / lose / nothing)
@@ -79,7 +105,7 @@ int playGame(int &position, int action, int t, bool draw = false) {
 		return 1;
 
 	if (obstacle->first - t == SHIFT_BIRD) {
-		if (obstacle->second != position)
+		if (abs(obstacle->second - position) > 2)
 			return 1;
 		else
 			return 2;
@@ -117,9 +143,9 @@ void episode_iterator(int position){
     while (true){
 
 		// get next action
-		if (position < JUMP)
+		if (position <= JUMP * 2)
 			action = 0;
-		else if (position > MAP_HEIGHT - JUMP)
+		else if (position >= MAP_HEIGHT - JUMP * 2)
 			action = 1;
 		else
 			action = rand() % 2;
@@ -149,6 +175,8 @@ int inference_best_action(int position, int t){
 	auto obstacle = getNextObstacle(t);
 
     for (int i = 0; i < ACTION_NUM; ++i) {
+		cout << Q[position][obstacle->first - t][obstacle->second][i] << endl;
+		cout << position << " " << obstacle->first - t << " " << obstacle->second << " " << i << endl;
         if (Q[position][obstacle->first - t][obstacle->second][i] > temp_max_q){
 			temp_max_q = Q[position][obstacle->first - t][obstacle->second][i];
             best_action = i;
@@ -202,14 +230,14 @@ void initialRMatrix() {
 		for (int j = 0; j < SPACE_BETWEEN; j++) {
 			for (int k = 0; k < MAP_HEIGHT; k++) {
 				if (i <= JUMP * 2)
-					R[i][j][k][1] = -100;
+					R[i][j][k][1] = -10000000;
 				if (i > MAP_HEIGHT - JUMP * 2)
-					R[i][j][k][0] = -100;
+					R[i][j][k][0] = -10000000;
 
 				if (j == SHIFT_BIRD - 1 && k == i - JUMP)
-					R[i][j][k][1] = 100;
+					R[i][j][k][1] = 10000000;
 				if (j == SHIFT_BIRD - 1 && i + DOWN == k)
-					R[i][j][k][0] = 100;
+					R[i][j][k][0] = 10000000;
 			}
 		}
 	}
@@ -222,15 +250,18 @@ int main() {
 	initialRMatrix();
 	loadQMatrix();
 
-	cout << "train" << endl;
-	run_training();
-	saveQMatrix();
-	cout << "saved" << endl;
+	int counter = 0;
+	//remove this while for real test
+	while (true) {
+		counter++;
+		cout << "train" << counter << endl;
+		run_training();
+		saveQMatrix();
+		cout << "saved" << endl;
+	}
 
-	/*
-	Mat a = Mat(MAP_HEIGHT, MAP_WIDTH, CV_8UC3);
-	imshow("qq", a);
-
+	
+	namedWindow("temp");
 	while (true){
 
 		int position = rand() % MAP_HEIGHT;
@@ -240,7 +271,7 @@ int main() {
 		while (true){
             int best_action = inference_best_action(position, t);
 
-			int result = playGame(position, best_action, t);
+			int result = playGame(position, best_action, t, true);
 
 			if (result == 1) {
 				cout << "GG";
@@ -248,9 +279,10 @@ int main() {
 			}
 
 			t++;
-			waitKey(300);
+			waitKey(50);
         }
     }
-*/
+	
+
     return 0;
 }
